@@ -1,14 +1,54 @@
+<<<<<<< HEAD
 data/
 *.csv
 *.zip
 
 
+=======
+# =========================
+# Virtual Environments
+# =========================
+venv/
+env/
+.venv/
+
+# =========================
+# Python Cache & Bytecode
+# =========================
+__pycache__/
+*.py[cod]
+*~
+.pytest_cache/
+
+# =========================
+# Environment Variables / Secrets
+# =========================
+.env
+
+# =========================
+# Jupyter Notebooks
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# Datasets and Extracted Features
+# =========================
+dataset/
+notebooks/dataset/
+notebooks/extraced_features/
+*.npy
+
+# =========================
+# Machine Learning Models & Weights
+# =========================
+>>>>>>> backend-final
 saved_models/
 *.h5
 *.hdf5
 *.pt
 *.pth
 *.pkl
+<<<<<<< HEAD
 
 
 venv/
@@ -25,3 +65,13 @@ __pycache__/
 
 
 .ipynb_checkpoints/venv/
+=======
+*.joblib
+
+# =========================
+# OS & IDE Specific
+# =========================
+.DS_Store
+.vscode/
+.idea/
+>>>>>>> backend-final
