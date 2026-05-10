@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-
-=======
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -30,4 +27,3 @@ async def read_root():
         "status": "Server live.",
         "message": "Skin Lesion API is running. Ready for inference requests.",
     }
->>>>>>> backend-final
