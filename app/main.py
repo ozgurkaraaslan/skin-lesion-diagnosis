@@ -1,5 +1,8 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from app.api.routes import router as api_router
 from app.core.config import settings
@@ -20,10 +23,10 @@ app.add_middleware(
 
 app.include_router(api_router, prefix="/api/v1")
 
+# --- UI SERVING PART ---
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
 
 @app.get("/")
 async def read_root():
-    return {
-        "status": "Server live.",
-        "message": "Skin Lesion API is running. Ready for inference requests.",
-    }
+    return FileResponse(os.path.join("frontend", "index.html"))
