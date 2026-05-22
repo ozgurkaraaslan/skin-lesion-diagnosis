@@ -1,27 +1,27 @@
 data/
 *.csv
 *.zip
+*.npy
 
-
-models/
+saved_models/
 *.h5
 *.hdf5
 *.pt
 *.pth
 *.pkl
 
-
 venv/
 env/
 .venv/
-
 
 __pycache__/
 *.py[cod]
 *~
 
-
 .env
 
+.ipynb_checkpoints/
 
-.ipynb_checkpoints/venv/
+outputs/
+
+.idea/

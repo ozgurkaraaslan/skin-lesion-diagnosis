@@ -1,0 +1,11 @@
+services:
+  skin-lesion-app:
+    build: .
+    container_name: skin_lesion_container
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: always

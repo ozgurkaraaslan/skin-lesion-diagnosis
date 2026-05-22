@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Skin Lesion Diagnosis System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* CSS for drag-and-drop animation */
+        .drag-over {
+            border-color: #3b82f6 !important;
+            background-color: #eff6ff !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 font-sans">
+
+    <header class="bg-white shadow-sm border-b border-slate-200">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                </svg>
+                <h1 class="text-xl font-bold text-slate-700">AI Skin Lesion Diagnostic Tool</h1>
+            </div>
+            <span id="serverStatus" class="bg-slate-100 text-slate-500 text-xs font-semibold px-3 py-1 rounded-full transition-colors duration-300">Checking Status...</span>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <h2 class="text-lg font-semibold border-b pb-3 mb-5">Patient Data & Image</h2>
+            
+            <form id="predictionForm" class="space-y-5">
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Lesion Image</label>
+                    <div id="dropzone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-lg hover:border-blue-500 hover:bg-blue-50 transition cursor-pointer">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-slate-600 justify-center">
+                                <span class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                    <span>Select Image</span>
+                                    <input id="imageUpload" name="file" type="file" class="sr-only" accept=".jpg, .jpeg, .png" required>
+                                </span>
+                                <p class="pl-1">or drag and drop</p>
+                            </div>
+                            <p class="text-xs text-slate-500">PNG, JPG, JPEG (Max. 10MB)</p>
+                        </div>
+                    </div>
+                    <div id="imagePreviewContainer" class="hidden mt-3">
+                        <img id="imagePreview" class="h-40 w-auto rounded-lg border shadow-sm object-cover" src="" alt="Preview">
+                        <button type="button" id="removeImageBtn" class="text-sm text-red-500 mt-1 hover:underline">Remove Image</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="age" class="block text-sm font-medium text-slate-700 mb-1">Age</label>
+                        <input type="number" name="age" id="age" min="0" max="120" required
+                            class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border" placeholder="e.g., 45">
+                    </div>
+
+                    <div>
+                        <label for="sex" class="block text-sm font-medium text-slate-700 mb-1">Biological Sex</label>
+                        <select id="sex" name="sex" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border">
+                            <option value="">Select...</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="unknown">Unknown</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="localization" class="block text-sm font-medium text-slate-700 mb-1">Localization (Body Part)</label>
+                    <select id="localization" name="localization" required class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border">
+                        <option value="">Select...</option>
+                        <option value="back">Back</option>
+                        <option value="lower extremity">Lower Extremity</option>
+                        <option value="trunk">Trunk</option>
+                        <option value="upper extremity">Upper Extremity</option>
+                        <option value="abdomen">Abdomen</option>
+                        <option value="face">Face</option>
+                        <option value="chest">Chest</option>
+                        <option value="foot">Foot</option>
+                        <option value="neck">Neck</option>
+                        <option value="scalp">Scalp</option>
+                        <option value="hand">Hand</option>
+                        <option value="ear">Ear</option>
+                        <option value="genital">Genital</option>
+                        <option value="acral">Acral</option>
+                        <option value="unknown">Unknown</option>
+                    </select>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 disabled:opacity-50">
+                    Analyze (Predict)
+                </button>
+            </form>
+        </div>
+
+        <div id="resultsPanel" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hidden">
+            <h2 class="text-lg font-semibold border-b pb-3 mb-5 text-slate-800">Analysis Result</h2>
+            
+            <div class="text-center mb-6">
+                <p class="text-sm text-slate-500 mb-1">Top Prediction</p>
+                <div id="predictionName" class="text-3xl font-extrabold text-blue-600 mb-2">Loading...</div>
+                <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-50 text-blue-700">
+                    Confidence Score: <span id="confidenceScore" class="ml-1">0.0%</span>
+                </div>
+            </div>
+
+            <h3 class="text-sm font-medium text-slate-700 mb-3">All Probabilities</h3>
+            <div id="probabilitiesList" class="space-y-3">
+                </div>
+        </div>
+
+        <div id="loadingPanel" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hidden flex flex-col items-center justify-center min-h-[300px]">
+            <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-blue-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-slate-600 font-medium text-center">Analyzing image...<br><span class="text-xs text-slate-400">Running DullRazor and ResNet50 algorithms</span></p>
+        </div>
+    </main>
+
+    <script>
+        // Class names mapping (Medical terminology)
+        const classNamesMapping = {
+            'nv': 'Melanocytic Nevus',
+            'mel': 'Melanoma',
+            'bkl': 'Benign Keratosis',
+            'bcc': 'Basal Cell Carcinoma',
+            'akiec': 'Actinic Keratosis',
+            'vasc': 'Vascular Lesion',
+            'df': 'Dermatofibroma'
+        };
+
+        const form = document.getElementById('predictionForm');
+        const fileInput = document.getElementById('imageUpload');
+        const dropzone = document.getElementById('dropzone');
+        const imagePreview = document.getElementById('imagePreview');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingPanel = document.getElementById('loadingPanel');
+        const resultsPanel = document.getElementById('resultsPanel');
+        const serverStatusBadge = document.getElementById('serverStatus');
+
+        // Backend Health Check on Page Load
+        async function checkServerHealth() {
+            try {
+                // Requesting the root endpoint (GET /)
+                const response = await fetch('http://127.0.0.1:8000/');
+                
+                if (response.ok) {
+                    serverStatusBadge.textContent = 'System Online';
+                    serverStatusBadge.className = 'bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full transition-colors duration-300';
+                    submitBtn.disabled = false;
+                } else {
+                    throw new Error('Server returned an error');
+                }
+            } catch (error) {
+                // If the server is offline, turn badge red and disable the submit button
+                serverStatusBadge.textContent = 'System Offline';
+                serverStatusBadge.className = 'bg-red-100 text-red-700 text-xs font-semibold px-3 py-1 rounded-full transition-colors duration-300';
+                
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Server is Offline';
+                submitBtn.classList.replace('bg-blue-600', 'bg-slate-400');
+                submitBtn.classList.replace('hover:bg-blue-700', 'hover:bg-slate-500');
+                submitBtn.classList.add('cursor-not-allowed');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', checkServerHealth);
+
+        // Drag and Drop Logic
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('drag-over');
+        });
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('drag-over');
+        });
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileUpload();
+            }
+        });
+        dropzone.addEventListener('click', () => {
+            fileInput.click();
+        });
+        fileInput.addEventListener('change', handleFileUpload);
+
+        function handleFileUpload() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // 10 MB Limit Check
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size is too large. Please select an image under 10MB.');
+                fileInput.value = '';
+                return;
+            }
+
+            // Show Image Preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                dropzone.classList.add('hidden');
+                imagePreviewContainer.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        removeImageBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            imagePreview.src = '';
+            imagePreviewContainer.classList.add('hidden');
+            dropzone.classList.remove('hidden');
+            resultsPanel.classList.add('hidden'); // Hide old results when a new file is triggered
+        });
+
+        // Form Submit (API Call)
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!fileInput.files[0]) {
+                alert("Please select a lesion image.");
+                return;
+            }
+
+            // Update UI for Loading State
+            submitBtn.disabled = true;
+            resultsPanel.classList.add('hidden');
+            loadingPanel.classList.remove('hidden');
+
+            const formData = new FormData(form);
+
+            try {
+                // FastAPI Endpoint
+                const response = await fetch('http://127.0.0.1:8000/api/v1/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('API Error: ' + response.statusText);
+
+                const result = await response.json();
+                renderResults(result);
+
+            } catch (error) {
+                alert('An error occurred. Make sure the backend server (uvicorn) is running.\nDetails: ' + error.message);
+                loadingPanel.classList.add('hidden');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+
+        function renderResults(data) {
+            loadingPanel.classList.add('hidden');
+            resultsPanel.classList.remove('hidden');
+
+            // Translate class names
+            const readableName = classNamesMapping[data.prediction] || data.prediction;
+            const percentage = (data.confidence * 100).toFixed(6);
+
+            document.getElementById('predictionName').innerText = readableName;
+            document.getElementById('confidenceScore').innerText = `${percentage}%`;
+
+            // Draw Probability Bars (Sorted highest to lowest)
+            const probsContainer = document.getElementById('probabilitiesList');
+            probsContainer.innerHTML = ''; // Clear previous
+
+            const sortedProbs = Object.entries(data.all_probabilities)
+                .sort((a, b) => b[1] - a[1]);
+
+            sortedProbs.forEach(([key, value]) => {
+                const probPercent = (value * 100).toFixed(6);
+                const className = classNamesMapping[key] || key;
+                
+                // Highlight the winning class in blue, others in gray
+                const barColor = key === data.prediction ? 'bg-blue-500' : 'bg-slate-300';
+                const textBold = key === data.prediction ? 'font-semibold text-slate-800' : 'text-slate-600';
+
+                const barHtml = `
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="${textBold}">${className}</span>
+                            <span class="text-slate-600">${probPercent}%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div class="${barColor} h-2 rounded-full" style="width: ${probPercent}%"></div>
+                        </div>
+                    </div>
+                `;
+                probsContainer.insertAdjacentHTML('beforeend', barHtml);
+            });
+        }
+    </script>
+</body>
+</html>
